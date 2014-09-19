@@ -35,8 +35,8 @@ __Filesystem structure:__
 __Installation:__
 
  - _core_ user must be able to ssh from master to slaves without password.
- - put replication.sh to /opt/bin
+ - put replication.sh to /opt/bin on all hosts
+ - copy replication.service and replication.timer to `/etc/systemd/system` on all hosts
  - set up replication config in etcd
    (eg. `/opt/bin/replication.sh -v [volname] -m [master-ip] -s [slave1-ip] -s [slave2-ip]`)
- - copy replication.service and replication.timer to `/etc/systemd/system`
- - enable and start replication timer
+ - enable and start replication timer on all hosts
