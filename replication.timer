@@ -1,0 +1,10 @@
+[Unit]
+Description=Replication timer
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+Unit=replication.service
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=PostgreSQL
+After=docker.service
+After=etcd.service
+
+[Service]
+Restart=always
+ExecStart=/usr/bin/docker run --rm --name postgres -v /replication/data/postgresql:/var/lib/postgresql/data -p 5432:5432 postgres:9.3
+ExecStop=/usr/bin/docker stop postgres
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+[Unit]
+Description=Replication service
+
+[Service]
+Type=simple
+ExecStart=/opt/bin/replication.sh
