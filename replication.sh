@@ -73,6 +73,21 @@ snapshot_cleanup()
     done
 }
 
+# initialize a volume
+init_vol()
+{
+    local vol_name=$1
+    local snap=$( etcdctl get $ETCD_ROOT/$vol_name/slaves/$MY_IP )
+
+    if [ "$snap" == "" ]
+    then
+        # create new volume
+        btrfs sub create $vol_path
+    else
+        # create rw snapshot from ro snapshot
+        btrfs sub snap $snap "$FS_ROOT/data/$vol_name"
+    fi
+}
 
 # run replication for a volume, if I'm master
 replicate_vol()
@@ -87,7 +102,7 @@ replicate_vol()
     # i'm master if ip matches
     if [ "$ip" == "$MY_IP" ]
     then
-	if [ ! -d $vol_path ]; then btrfs sub create $vol_path; fi
+	if [ ! -d $vol_path ]; then init_vol $vol_name; fi
 	btrfs sub snap -r $vol_path $snap_path
 	sync
 
@@ -118,7 +133,7 @@ VOL=""
 MASTER=""
 SLAVES=()
 N=0
-while getopts "iv:m:s:" opt
+while getopts "iv:m:s:p:" opt
 do
     case "$opt" in
 	i)
@@ -135,27 +150,43 @@ do
 	    SLAVES[$N]=$OPTARG
 	    N=$N+1
 	    ;;
+        p)
+            NEW_MASTER=$OPTARG
+            ;;
     esac
 done
 
 
+# PROMOTE TO MASTER
+if [ "$VOL" != "" ] && [ "$NEW_MASTER" != "" ]
+then
+    echo Promoting $NEW_MASTER to master
+    etcdctl update $ETCD_ROOT/$VOL/master $NEW_MASTER
+
+    # clear references to snapshots, because snapshots from 
+    # previous master cannot be used as parents
+    for slave in $( etcdctl ls $ETCD_ROOT/$VOL/slaves )
+    do
+        etcdctl set $slave ''
+    done
+    exit 0
+fi
+
 # UPDATE CONFIG
-check_structure
-if [ "$VOL" != "" ]
+if [ "$VOL" != "" ] && [ "$MASTER" != "" ]
 then
     etcdctl mkdir $ETCD_ROOT/$VOL/slaves
-    if [ "$MASTER" != "" ]
-    then
-	etcdctl set $ETCD_ROOT/$VOL/master $MASTER
-    fi
+    etcdctl set $ETCD_ROOT/$VOL/master $MASTER
     for item in ${SLAVES[*]}
     do
 	etcdctl set $ETCD_ROOT/$VOL/slaves/$item ''
     done
+    exit 0
 fi
 
 
 # RUN REPLICATION ACCORDING TO CONFIG
+check_structure
 for line in $( etcdctl ls $ETCD_ROOT )
 do
     replicate_vol $line
