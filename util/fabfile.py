@@ -63,7 +63,7 @@ def replication_setup():
 
 @hosts(pg_host)
 def postgres_setup():
-    put("postgres.service", "/tmp/postgres.service", mode=0644)
+    put("../postgres.service", "/tmp/postgres.service", mode=0644)
     sudo("if [ -f /etc/systemd/system/postgres.service ]; then rm /etc/systemd/system/postgres.service; fi")
     sudo("mv /tmp/postgres.service /etc/systemd/system")
     sudo("systemctl daemon-reload")
