@@ -4,6 +4,7 @@ ETCD_ROOT=/replication
 FS_ROOT=/replication
 MY_IP=$( hostname -i | tr -d ' ' )
 DATE="$(date '+%Y%m%d_%H%M%S')"
+RETAIN_N=5
 
 
 # make sure that required folders
@@ -54,7 +55,7 @@ snapshot_cleanup()
     local vol_name=$1
     local snap=""
 
-    for snap in $( ls "$FS_ROOT/snapshots" | grep "${vol_name}_" )
+    for snap in $( ls "$FS_ROOT/snapshots" | grep "${vol_name}_" | head -n -$RETAIN_N )
     do
 	snaps[$n]="$FS_ROOT/snapshots/$snap"
 	n=$n+1
