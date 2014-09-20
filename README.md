@@ -1,5 +1,6 @@
 Experiment with btrfs send/receive and CoreOS
 -------------------------
+_Experimental: not much attention has been given to all possible failure modes!!!_
 
 Incremental backup script based on:
 
