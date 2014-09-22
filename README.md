@@ -9,6 +9,19 @@ Incremental backup script based on:
 
 __etcd structure:__
 
+```
+/replication
+    VOLUME1-NAME
+        master = MASTER-IP
+        slaves
+          MASTER-IP = LATEST_SNAPSHOT (added automatically if it
+                                       doesn't already exist) 
+          SLAVE1-IP = LATEST_SNAPSHOT  
+          SLAVE2-IP = LATEST_SNAPSHOT  
+          ....
+    VOLUME2-NAME
+    ...
+```
 
 ```
 core@core1 ~ $ etcdctl ls --recursive /replication
