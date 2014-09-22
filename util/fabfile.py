@@ -40,6 +40,13 @@ def replicate():
     sudo("/opt/bin/replication.sh")
 
 @hosts(all_hosts)
+def uninstall_replication_timer():
+    sudo("systemctl stop replication.timer")
+    sudo("systemctl disable replication.timer")
+    sudo("rm -f /etc/systemd/system/replication.*")
+    sudo("systemctl daemon-reload")
+
+@hosts(all_hosts)
 def replication_setup():
     put("../replication.sh", "/tmp/replication.sh", mode=0755)
     put("../replication.service", "/tmp/replication.service", mode=0644)
